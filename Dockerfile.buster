@@ -1,0 +1,110 @@
+FROM gcr.io/google_containers/hyperkube:v1.17.4 as source
+
+FROM debian:buster
+
+COPY --from=source /usr/local/bin/clean-install /usr/local/bin/clean-install 
+
+# Taken from: https://github.com/kubernetes/kubernetes/blob/release-1.17/build/debian-hyperkube-base/Dockerfile
+
+# TODO(#69896): deprecate the shortened aliases in /
+RUN ln -s /hyperkube /apiserver \
+ && ln -s /hyperkube /cloud-controller-manager \
+ && ln -s /hyperkube /controller-manager \
+ && ln -s /hyperkube /kubectl \
+ && ln -s /hyperkube /kubelet \
+ && ln -s /hyperkube /proxy \
+ && ln -s /hyperkube /scheduler \
+ && ln -s /hyperkube /usr/local/bin/cloud-controller-manager \
+ && ln -s /hyperkube /usr/local/bin/kube-apiserver \
+ && ln -s /hyperkube /usr/local/bin/kube-controller-manager \
+ && ln -s /hyperkube /usr/local/bin/kube-proxy \
+ && ln -s /hyperkube /usr/local/bin/kube-scheduler \
+ && ln -s /hyperkube /usr/local/bin/kubectl \
+ && ln -s /hyperkube /usr/local/bin/kubelet
+
+RUN echo CACHEBUST>/dev/null && clean-install \
+    bash
+
+# The samba-common, cifs-utils, and nfs-common packages depend on
+# ucf, which itself depends on /bin/bash.
+RUN echo "dash dash/sh boolean false" | debconf-set-selections
+RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
+
+RUN echo CACHEBUST>/dev/null && clean-install \
+    ca-certificates \
+    ceph-common \
+    cifs-utils \
+    conntrack \
+    e2fsprogs \
+    xfsprogs \
+    ebtables \
+    ethtool \
+    git \
+    glusterfs-client \
+    iptables \
+    ipset \
+    jq \
+    kmod \
+    openssh-client \
+    netbase \
+    nfs-common \
+    socat \
+    udev \
+    util-linux
+
+# Copy stuff from hyperkube
+
+COPY --from=source /opt/cni/bin /opt/cni/bin
+COPY --from=source /usr/local/bin/kube-apiserver /usr/local/bin/kube-apiserver 
+COPY --from=source /usr/local/bin/kube-controller-manager /usr/local/bin/kube-controller-manager
+COPY --from=source /usr/local/bin/kube-proxy /usr/local/bin/kube-proxy
+COPY --from=source /usr/local/bin/kube-scheduler /usr/local/bin/kube-scheduler 
+COPY --from=source /usr/local/bin/kubectl /usr/local/bin/kubectl 
+COPY --from=source /usr/local/bin/kubelet /usr/local/bin/kubelet 
+COPY --from=source /hyperkube /hyperkube
+
+RUN sed -i -e 's!\bmain\b!main contrib!g' /etc/apt/sources.list && \
+    apt-get update && apt-get upgrade -y && apt-get clean && \
+    clean-install apt-transport-https gnupg1 curl zfsutils-linux \
+    && echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ stretch main" > \
+    /etc/apt/sources.list.d/azure-cli.list \
+    && curl -L https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && apt-get purge gnupg \
+    && clean-install \
+    xfsprogs \
+    open-iscsi \
+    azure-cli
+
+RUN echo "deb http://deb.debian.org/debian stretch-backports main" >> \
+    /etc/apt/sources.list.d/backports.list \
+    && clean-install -t stretch-backports glusterfs-client glusterfs-common
+
+# Taken from: https://github.com/kubernetes/kubernetes/blob/master/build/debian-iptables/Dockerfile
+
+# Install latest iptables package from buster-backports
+RUN echo deb http://deb.debian.org/debian buster-backports main >> /etc/apt/sources.list; \
+    apt-get update; \
+    apt-get -t buster-backports -y --no-install-recommends install iptables
+
+# Install other dependencies and then clean up apt caches
+RUN clean-install \
+    conntrack \
+    ebtables \
+    ipset \
+    kmod \
+    netbase
+
+# Install iptables wrapper scripts to detect the correct iptables mode
+# the first time any of them is run
+COPY iptables-wrapper /usr/sbin/iptables-wrapper
+
+RUN update-alternatives \
+    --install /usr/sbin/iptables iptables /usr/sbin/iptables-wrapper 100 \
+    --slave /usr/sbin/iptables-restore iptables-restore /usr/sbin/iptables-wrapper \
+    --slave /usr/sbin/iptables-save iptables-save /usr/sbin/iptables-wrapper
+RUN update-alternatives \
+    --install /usr/sbin/ip6tables ip6tables /usr/sbin/iptables-wrapper 100 \
+    --slave /usr/sbin/ip6tables-restore ip6tables-restore /usr/sbin/iptables-wrapper \
+    --slave /usr/sbin/ip6tables-save ip6tables-save /usr/sbin/iptables-wrapper
+
+ENTRYPOINT ["/hyperkube"]

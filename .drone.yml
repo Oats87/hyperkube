@@ -14,11 +14,11 @@ steps:
       password:
         from_secret: docker_password
       dockerfile: Dockerfile
-      repo: rancher/hyperkube
+      repo: oats87/hyperkube
       tag: "${DRONE_TAG}-linux-amd64"
     when:
       instance:
-        - drone-publish.rancher.io
+        - drone.fremont.rancherlabs.com
       event:
         - tag
 ---
@@ -38,11 +38,11 @@ steps:
       password:
         from_secret: docker_password
       dockerfile: Dockerfile.arm64
-      repo: rancher/hyperkube
+      repo: oats87/hyperkube
       tag: "${DRONE_TAG}-linux-arm64"
     when:
       instance:
-        - drone-publish.rancher.io
+        - drone.fremont.rancherlabs.com
       event:
         - tag
 ---
@@ -63,7 +63,7 @@ steps:
       password:
         from_secret: docker_password
       dockerfile: Dockerfile.windows
-      repo: rancher/hyperkube
+      repo: oats87/hyperkube
       tag: "${DRONE_TAG}-windows-1809"
       build_args:
         - SERVERCORE_VERSION=1809
@@ -72,7 +72,7 @@ steps:
         path: \\\\.\\pipe\\docker_engine
     when:
       instance:
-        - drone-publish.rancher.io
+        - drone.fremont.rancherlabs.com
       event:
         - tag
 
@@ -98,7 +98,7 @@ steps:
       password:
         from_secret: docker_password
       dockerfile: Dockerfile.windows
-      repo: rancher/hyperkube
+      repo: oats87/hyperkube
       tag: "${DRONE_TAG}-windows-1903"
       build_args:
         - SERVERCORE_VERSION=1903
@@ -107,7 +107,7 @@ steps:
         path: \\\\.\\pipe\\docker_engine
     when:
       instance:
-        - drone-publish.rancher.io
+        - drone.fremont.rancherlabs.com
       event:
         - tag
 
@@ -131,7 +131,7 @@ steps:
       ignore_missing: true
     when:
       instance:
-        - drone-publish.rancher.io
+        - drone.fremont.rancherlabs.com
       event:
         - tag
 depends_on:

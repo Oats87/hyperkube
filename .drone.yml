@@ -14,7 +14,8 @@ steps:
       password:
         from_secret: docker_password
       dockerfile: Dockerfile
-      repo: oats87/hyperkube
+      registry: quay.fremont.rancherlabs.com
+      repo: quay.fremont.rancherlabs.com/ckim/hyperkube
       tag: "${DRONE_TAG}-linux-amd64"
     when:
       instance:
@@ -38,7 +39,8 @@ steps:
       password:
         from_secret: docker_password
       dockerfile: Dockerfile.arm64
-      repo: oats87/hyperkube
+      registry: quay.fremont.rancherlabs.com
+      repo: quay.fremont.rancherlabs.com/ckim/hyperkube
       tag: "${DRONE_TAG}-linux-arm64"
     when:
       instance:
@@ -63,7 +65,8 @@ steps:
       password:
         from_secret: docker_password
       dockerfile: Dockerfile.windows
-      repo: oats87/hyperkube
+      registry: quay.fremont.rancherlabs.com
+      repo: quay.fremont.rancherlabs.com/ckim/hyperkube
       tag: "${DRONE_TAG}-windows-1809"
       build_args:
         - SERVERCORE_VERSION=1809
@@ -98,7 +101,8 @@ steps:
       password:
         from_secret: docker_password
       dockerfile: Dockerfile.windows
-      repo: oats87/hyperkube
+      registry: quay.fremont.rancherlabs.com
+      repo: quay.fremont.rancherlabs.com/ckim/hyperkube
       tag: "${DRONE_TAG}-windows-1903"
       build_args:
         - SERVERCORE_VERSION=1903
@@ -121,7 +125,7 @@ name: manifest
 
 steps:
   - name: push-manifest
-    image: plugins/manifest:1.1.0
+    image: plugins/manifest
     settings:
       username:
         from_secret: docker_username

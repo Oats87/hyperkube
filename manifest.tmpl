@@ -1,28 +1,28 @@
-image: oats87/hyperkube:{{build.tag}}
+image: quay.fremont.rancherlabs.com/ckim/hyperkube:{{build.tag}}
 manifests:
   -
-    image: oats87/hyperkube:{{build.tag}}-linux-amd64
+    image: quay.fremont.rancherlabs.com/ckim/hyperkube:{{build.tag}}-linux-amd64
     platform:
       architecture: amd64
       os: linux
   -
-    image: oats87/hyperkube:{{build.tag}}-linux-arm64
+    image: quay.fremont.rancherlabs.com/ckim/hyperkube:{{build.tag}}-linux-arm64
     platform:
       architecture: arm64
       os: linux
   -
-    image: oats87/hyperkube:{{build.tag}}-linux-arm
+    image: quay.fremont.rancherlabs.com/ckim/hyperkube:{{build.tag}}-linux-arm
     platform:
       architecture: arm
       os: linux
   -
-    image: oats87/hyperkube:{{build.tag}}-windows-1809
+    image: quay.fremont.rancherlabs.com/ckim/hyperkube:{{build.tag}}-windows-1809
     platform:
       architecture: amd64
       os: windows
       version: 1809
   -
-    image: oats87/hyperkube:{{build.tag}}-windows-1903
+    image: quay.fremont.rancherlabs.com/ckim/hyperkube:{{build.tag}}-windows-1903
     platform:
       architecture: amd64
       os: windows
